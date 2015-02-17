@@ -1,7 +1,7 @@
 {
   "name": "context-menu",
   "description": "Creates Menu-Entries for building tests with ConTeXt",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "author": "Christian Prim",
   "engines": {
     "c9": ">=3.0.0"
