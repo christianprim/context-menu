@@ -1,0 +1,27 @@
+{
+  "name": "context-menu",
+  "description": "Creates Menu-Entries for building tests with ConTeXt",
+  "version": "0.0.0",
+  "author": "Christian Prim",
+  "engines": {
+    "c9": ">=3.0.0"
+  },
+  "contributors": [
+    {
+      "name": "Christian Prim",
+      "email": "christian.prim@gmx.ch"
+    }
+  ],
+  "main": "context-menu.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/christianprim/context-menu.git"
+  },
+  "plugins": {
+    "context-menu": {}
+  },
+  "categories": [
+    "miscellaneous"
+  ],
+  "licenses": []
+}
