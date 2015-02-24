@@ -1,6 +1,6 @@
 define(function(require, exports, module) {
     main.consumes = [
-        "Plugin", "ui", "commands", "menus", "run", "console", "fs"
+        "Plugin", "ui", "commands", "menus", "run", "console", "fs", "tabManager"
     ];
     main.provides = ["context-menu"];
     return main;
@@ -13,13 +13,13 @@ define(function(require, exports, module) {
         var run = imports.run;
         var console = imports.console;
         var fs = imports.fs;
+        var tabs = imports.tabManager;
 
         /***** Initialization *****/
         
         var plugin = new Plugin("Ajax.org", main.consumes);
-//        var emit = plugin.getEmitter();
+        var emit = plugin.getEmitter();
         
-        var showing;
         function load() {
             commands.addCommand({
                 name: "aufgaben",
@@ -33,11 +33,20 @@ define(function(require, exports, module) {
                     fs.exists("/documents/pruefungen/aufgaben.log", function(exists) {
                         if (exists) {
                             console.open({
-                                path       : "/home/ubuntu/workspace/documents/pruefungen/aufgaben.log",
+                                path       : "/documents/pruefungen/aufgaben.log",
                                 active     : true,
                                 demandExisting : true,
                             }, function(){});
                         }
+                    });
+                    fs.watch("/documents/pruefungen/aufgaben.pdf", function(err,event,filename) {
+                        if(event=="change") {
+                            tabs.preview({
+                                active          : true,
+                                path            : "/documents/pruefungen/aufgaben.pdf",
+                            }, function(err,tab,done){if (err) throw err.message;});
+                        }
+                        if (err) throw err.message;
                     });
                 }
             }, plugin);
@@ -54,11 +63,20 @@ define(function(require, exports, module) {
                     fs.exists("/documents/pruefungen/musterloesung.log", function(exists) {
                         if (exists) {
                             console.open({
-                                path       : "/home/ubuntu/workspace/documents/pruefungen/musterloesung.log",
+                                path       : "/documents/pruefungen/musterloesung.log",
                                 active     : true,
                                 demandExisting : true,
                             }, function(){});
                         }
+                    });
+                    fs.watch("/documents/pruefungen/musterloesung.pdf", function(err,event,filename) {
+                        if(event=="change") {
+                            tabs.preview({
+                                active          : true,
+                                path            : "/documents/pruefungen/musterloesung.pdf",
+                            }, function(err,tab,done){if (err) throw err.message;});
+                        }
+                        if (err) throw err.message;
                     });
                 }
             }, plugin);
@@ -85,12 +103,12 @@ define(function(require, exports, module) {
             }, plugin);
             
             
-            menus.setRootMenu("ConTeXt", 650, plugin);
-            menus.addItemByPath("ConTeXt/Aufgabenblatt", new ui.item({ command : "aufgaben" }), 100, plugin);
-            menus.addItemByPath("ConTeXt/Musterlösung", new ui.item({ command : "musterloesung" }), 200, plugin);
-            menus.addItemByPath("ConTeXt/~", new ui.divider(), 250, plugin);
-            menus.addItemByPath("ConTeXt/Aufräumen", new ui.item({ command : "aufraeumen" }), 300, plugin);
-            menus.addItemByPath("ConTeXt/Git aktualisieren", new ui.item({ command : "updateGit" }), 400, plugin); 
+            menus.setRootMenu("Prüfung", 650, plugin);
+            menus.addItemByPath("Prüfung/Aufgabenblatt", new ui.item({ command : "aufgaben" }), 100, plugin);
+            menus.addItemByPath("Prüfung/Musterlösung", new ui.item({ command : "musterloesung" }), 200, plugin);
+            menus.addItemByPath("Prüfung/~", new ui.divider(), 250, plugin);
+            menus.addItemByPath("Prüfung/Aufräumen", new ui.item({ command : "aufraeumen" }), 300, plugin);
+            menus.addItemByPath("Prüfung/Git aktualisieren", new ui.item({ command : "updateGit" }), 400, plugin); 
         }
         
 
@@ -103,6 +121,7 @@ define(function(require, exports, module) {
             load();
         });
         plugin.on("unload", function() {
+            
         });
         
 
