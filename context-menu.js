@@ -1,6 +1,6 @@
 define(function(require, exports, module) {
     main.consumes = [
-        "Plugin", "ui", "commands", "menus", "run", "console", "fs", "tabManager"
+        "Plugin", "ui", "commands", "menus", "run", "console", "fs", "tabManager", "proc"
     ];
     main.provides = ["context-menu"];
     return main;
@@ -11,9 +11,10 @@ define(function(require, exports, module) {
         var menus = imports.menus;
         var commands = imports.commands;
         var run = imports.run;
-        var console = imports.console;
+        var console_panel = imports.console;
         var fs = imports.fs;
         var tabs = imports.tabManager;
+        var proc = imports.proc;
 
         /***** Initialization *****/
         
@@ -32,7 +33,7 @@ define(function(require, exports, module) {
                         if (err) throw err.message;});
                     fs.exists("/documents/pruefungen/aufgaben.log", function(exists) {
                         if (exists) {
-                            console.open({
+                            console_panel.open({
                                 path       : "/documents/pruefungen/aufgaben.log",
                                 active     : true,
                                 demandExisting : true,
@@ -62,7 +63,7 @@ define(function(require, exports, module) {
                         if (err) throw err.message;});
                     fs.exists("/documents/pruefungen/musterloesung.log", function(exists) {
                         if (exists) {
-                            console.open({
+                            console_panel.open({
                                 path       : "/documents/pruefungen/musterloesung.log",
                                 active     : true,
                                 demandExisting : true,
@@ -98,7 +99,19 @@ define(function(require, exports, module) {
                 bindKey: { mac: "Command-Shift-U", win: "Ctrl-Shift-U" },
                 isAvailable: function(){ return true; },
                 exec: function() {
-                    //showing ? hide() : show();
+                        proc.spawn('/usr/bin/nawk',{args : ["-f", options.staticPrefix + "/update-git.awk", 
+                        //proc.spawn('/usr/bin/nawk',{args : ["-f","/home/ubuntu/.c9/plugins/context.menu/update-git.awk", 
+                        "/home/ubuntu/workspace/documents/pruefungen/auswahl.tex"]},function(err,process) {
+                        process.stdout.on('data',function(data) {
+                            var commit_msg = data;
+                            console.log(commit_msg);
+                            
+                        });
+                        process.stderr.on('data',function(data) {
+                            console.log('stderr: ' + data);
+                        });
+                        if (err) console.log(err.message);
+                    });
                 }
             }, plugin);
             
