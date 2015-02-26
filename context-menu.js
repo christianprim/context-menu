@@ -1,6 +1,6 @@
 define(function(require, exports, module) {
     main.consumes = [
-        "Plugin", "ui", "commands", "menus", "run", "console", "fs", "tabManager", "proc"
+        "Plugin", "ui", "commands", "menus", "run", "console", "fs", "tabManager", "proc", "Dialog"
     ];
     main.provides = ["context-menu"];
     return main;
@@ -15,11 +15,40 @@ define(function(require, exports, module) {
         var fs = imports.fs;
         var tabs = imports.tabManager;
         var proc = imports.proc;
+        var Dialog = imports.Dialog;
+        var OK_pressed = false;
 
         /***** Initialization *****/
         
         var plugin = new Plugin("Ajax.org", main.consumes);
         var emit = plugin.getEmitter();
+
+        var commit_dialog = new Dialog("Christian Prim", main.consumes, {
+                name: "context-menu",
+                allowClose: true,
+                title: "Prüfung",
+                heading: "Git aktualisieren",
+                body: "Benennen Sie die gemachte Änderung",
+                elements: [
+                    { type : "textbox", id : "message", width : 300 },
+                    { type : "label", id : "empty_message", caption: "!", style: "color:rgb(255, 0, 0);", visible : false },
+                    { type : "filler" },
+                    { type: "button", id: "cancel", color: "gray", caption: "Abbrechen", hotkey : "ESC", onclick: function(){commit_dialog.hide()} },
+                    { type: "button", id: "ok", color: "green", caption: "OK", "default": true, onclick: function()
+                        {if (commit_dialog.getElement("message").value ==="") { 
+                            commit_dialog.update([{ id : "empty_message", visible : true }]);
+                        }
+                        else {
+                            OK_pressed = true;
+                            commit_dialog.update([{ id : "empty_message", visible : false }]);
+                            commit_dialog.hide();
+                        }
+                        
+                        } 
+                        
+                    }
+                ]
+            });
         
         function load() {
             commands.addCommand({
@@ -99,13 +128,14 @@ define(function(require, exports, module) {
                 bindKey: { mac: "Command-Shift-U", win: "Ctrl-Shift-U" },
                 isAvailable: function(){ return true; },
                 exec: function() {
-                        proc.spawn('/usr/bin/nawk',{args : ["-f", options.staticPrefix + "/update-git.awk", 
-                        //proc.spawn('/usr/bin/nawk',{args : ["-f","/home/ubuntu/.c9/plugins/context.menu/update-git.awk", 
+                        proc.spawn('/usr/bin/nawk',{args : ["-f","/home/ubuntu/.c9/plugins/context.menu/update-git.awk", 
                         "/home/ubuntu/workspace/documents/pruefungen/auswahl.tex"]},function(err,process) {
                         process.stdout.on('data',function(data) {
                             var commit_msg = data;
-                            console.log(commit_msg);
-                            
+                            commit_dialog.show(commit_msg,function(message){ 
+                                console.log(message); 
+                                /* ToDo */
+                            });
                         });
                         process.stderr.on('data',function(data) {
                             console.log('stderr: ' + data);
@@ -127,14 +157,51 @@ define(function(require, exports, module) {
 
         /***** Methods *****/
         
+        function show(msg,onok) {
+            return commit_dialog.queue(function(){
+                
+                commit_dialog.once("draw",function(){
+                    commit_dialog.getElement("message").setAttribute("value",msg);
+                    OK_pressed = false;
+                });
+                commit_dialog.on("hide", function(){
+                    if (OK_pressed) { 
+                        onok && onok(commit_dialog.getElement("message").value);
+                    }
+                });
+            });
+        }
+        
+        /***** Register *****/
 
+        /**
+         * @internal Use dialog.alert instead
+         * @ignore
+         */
+        commit_dialog.freezePublicAPI({
+            /**
+             * @readonly
+             */
+            get message(){ 
+                return commit_dialog.getElement("message").value;
+            },
+
+            /**
+             * Show an alert dialog.
+             * 
+             * @param {String} [msg]       The message to display
+             * @param {Function} [onok]  The function to call after it's closed.
+             */
+            show: show
+        });
+        
         /***** Lifecycle *****/
         
         plugin.on("load", function() {
             load();
         });
         plugin.on("unload", function() {
-            
+            OK_pressed = false;
         });
         
 
