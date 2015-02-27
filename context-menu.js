@@ -133,8 +133,16 @@ define(function(require, exports, module) {
                         process.stdout.on('data',function(data) {
                             var commit_msg = data;
                             commit_dialog.show(commit_msg,function(message){ 
-                                console.log(message); 
-                                /* ToDo */
+                                run.run({cmd: [ 'bash', '-c', 'git commit -a -m"' + message + '"', '&&', 'git push origin master' ], working_dir: "/home/ubuntu/workspace/documents"}, {},
+                                function(err, pid) {
+                                    if (err) throw err.message;
+                                });
+                                console_panel.open({
+                                    editorType : "output",
+                                    active     : true,
+                                    demandExisting : true,
+                                    }, function(){}
+                                );
                             });
                         });
                         process.stderr.on('data',function(data) {
