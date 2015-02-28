@@ -133,16 +133,24 @@ define(function(require, exports, module) {
                         process.stdout.on('data',function(data) {
                             var commit_msg = data;
                             commit_dialog.show(commit_msg,function(message){ 
-                                run.run({cmd: [ 'bash', '-c', 'git commit -a -m"' + message + '"', '&&', 'git push origin master' ], working_dir: "/home/ubuntu/workspace/documents"}, {},
-                                function(err, pid) {
-                                    if (err) throw err.message;
+                                proc.spawn('/bin/bash',{args : ["/home/ubuntu/.c9/plugins/context.menu/update-git.sh"], 
+                                env : {"MESSAGE" : message}, 
+                                cwd : "/home/ubuntu/workspace/documents/pruefungen"
+                                },
+                                function(err,git_process) {
+                                    git_process.stdout.on('end',function() {
+                                        fs.exists("/documents/pruefungen/git_out.log", function(exists) {
+                                            if (exists) {
+                                                console_panel.open({
+                                                    path       : "/documents/pruefungen/git_out.log",
+                                                    active     : true,
+                                                    demandExisting : true,
+                                                }, function(){});
+                                            }
+                                        });
+                                    });
+                                    if (err) console.log(err.message);
                                 });
-                                console_panel.open({
-                                    editorType : "output",
-                                    active     : true,
-                                    demandExisting : true,
-                                    }, function(){}
-                                );
                             });
                         });
                         process.stderr.on('data',function(data) {
