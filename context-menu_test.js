@@ -8,7 +8,7 @@ define(function(require, exports, module) {
 
     function main(options, imports, register) {
         var test = imports["plugin.test"];
-        var context-menu = imports.context-menu;
+        var contextmenu = imports["context-menu"];
         
         var describe = test.describe;
         var it = test.it;

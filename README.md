@@ -1,3 +1,3 @@
-# c9.ide.example
+# context.menu
 
-This is the Cloud9 default plugin example
+This is a custom menu for my personal use. It can serve as start for other projects.
