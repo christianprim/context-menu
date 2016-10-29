@@ -1,5 +1,7 @@
 define("plugins/context.menu/__installed__", [],[
-    "plugins/context.menu/context-menu"
+    {
+        "packagePath": "plugins/context.menu/context-menu"
+    }
 ]);
 
 define("plugins/context.menu/context-menu",[], function(require, exports, module) {
@@ -58,28 +60,13 @@ define("plugins/context.menu/context-menu",[], function(require, exports, module
                 bindKey: { mac: "Command-Shift-A", win: "Ctrl-Shift-A" },
                 isAvailable: function(){ return true; },
                 exec: function() {
-                    run.run({cmd: [ "context", "--nonstopmode", "aufgaben.tex" ], working_dir: "/home/ubuntu/workspace/documents/pruefungen", 
-                        env: {'PATH' : '/home/ubuntu/workspace/context/tex/texmf-linux-64/bin:$PATH'}}, {},
-                        function(err, pid) {
-                        if (err) throw err.message;});
-                    fs.exists("/documents/pruefungen/aufgaben.log", function(exists) {
-                        if (exists) {
-                            console_panel.open({
-                                path       : "/documents/pruefungen/aufgaben.log",
-                                active     : true,
-                                demandExisting : true,
-                            }, function(){});
-                        }
-                    });
-                    fs.watch("/documents/pruefungen/aufgaben.pdf", function(err,event,filename) {
-                        if(event=="change") {
-                            tabs.preview({
-                                active          : true,
-                                path            : "/documents/pruefungen/aufgaben.pdf",
-                            }, function(err,tab,done){if (err) throw err.message;});
-                        }
-                        if (err) throw err.message;
-                    });
+                    proc.spawn('/bin/bash',{args : ["/home/ubuntu/.c9/plugins/context.menu/compile.sh"], 
+                                env : {'DOCUMENT' : 'aufgaben'},
+                                cwd : "/home/ubuntu/workspace/documents/pruefungen"
+                                },
+                                function(err,process) {
+                                    if (err) throw err.message;
+                                });
                 }
             }, plugin);
             
@@ -88,28 +75,13 @@ define("plugins/context.menu/context-menu",[], function(require, exports, module
                 bindKey: { mac: "Command-Shift-M", win: "Ctrl-Shift-M" },
                 isAvailable: function(){ return true; },
                 exec: function() {
-                    run.run({cmd: [ "context", "--nonstopmode", "musterloesung.tex" ], working_dir: "/home/ubuntu/workspace/documents/pruefungen", 
-                        env: {'PATH' : '/home/ubuntu/workspace/context/tex/texmf-linux-64/bin:$PATH'}}, {},
-                        function(err, pid) {
-                        if (err) throw err.message;});
-                    fs.exists("/documents/pruefungen/musterloesung.log", function(exists) {
-                        if (exists) {
-                            console_panel.open({
-                                path       : "/documents/pruefungen/musterloesung.log",
-                                active     : true,
-                                demandExisting : true,
-                            }, function(){});
-                        }
-                    });
-                    fs.watch("/documents/pruefungen/musterloesung.pdf", function(err,event,filename) {
-                        if(event=="change") {
-                            tabs.preview({
-                                active          : true,
-                                path            : "/documents/pruefungen/musterloesung.pdf",
-                            }, function(err,tab,done){if (err) throw err.message;});
-                        }
-                        if (err) throw err.message;
-                    });
+                    proc.spawn('/bin/bash',{args : ["/home/ubuntu/.c9/plugins/context.menu/compile.sh"], 
+                                env : {'DOCUMENT' : 'musterloesung'},
+                                cwd : "/home/ubuntu/workspace/documents/pruefungen"
+                                },
+                                function(err,process) {
+                                    if (err) throw err.message;
+                                });
                 }
             }, plugin);
             
@@ -118,11 +90,18 @@ define("plugins/context.menu/context-menu",[], function(require, exports, module
                 bindKey: { mac: "Command-Shift-X", win: "Ctrl-Shift-X" },
                 isAvailable: function(){ return true; },
                 exec: function() {
-                    run.run({cmd: [ "bash", "-c", "rm *.pgf *.tuc" ], working_dir: "/home/ubuntu/workspace/documents/pruefungen"}, {},
-                        function(err, pid) {
-                            if (err) throw err.message;
+                    proc.spawn('/bin/bash',{args : ["-c","rm *.pgf *.tuc *.log"],
+                        cwd : "/home/ubuntu/workspace/documents/pruefungen"},
+                        function(err,process){
+                        process.stdout.on('data',function(data) {
+                            console.log('stdout: ' + data);
                         });
-                    }
+                        process.stderr.on('data',function(data) {
+                            console.log('stderr: ' + data);
+                        });
+                        if (err) console.log(err.message);
+                    });
+                }
             }, plugin);
             
             commands.addCommand({
