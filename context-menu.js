@@ -67,6 +67,20 @@ define(function(require, exports, module) {
             }, plugin);
             
             commands.addCommand({
+                name: "matur",
+                isAvailable: function(){ return true; },
+                exec: function() {
+                    proc.spawn('/bin/bash',{args : ["/home/ubuntu/.c9/plugins/context.menu/compile.sh"], 
+                                env : {'DOCUMENT' : 'matur'},
+                                cwd : "/home/ubuntu/workspace/documents/pruefungen"
+                                },
+                                function(err,process) {
+                                    if (err) throw err.message;
+                                });
+                }
+            }, plugin);
+            
+            commands.addCommand({
                 name: "musterloesung",
                 bindKey: { mac: "Command-Shift-M", win: "Ctrl-Shift-M" },
                 isAvailable: function(){ return true; },
@@ -102,7 +116,6 @@ define(function(require, exports, module) {
             
             commands.addCommand({
                 name: "updateGit",
-                bindKey: { mac: "Command-Shift-U", win: "Ctrl-Shift-U" },
                 isAvailable: function(){ return true; },
                 exec: function() {
                         proc.spawn('/usr/bin/nawk',{args : ["-f","/home/ubuntu/.c9/plugins/context.menu/update-git.awk", 
@@ -142,6 +155,7 @@ define(function(require, exports, module) {
             menus.setRootMenu("Prüfung", 650, plugin);
             menus.addItemByPath("Prüfung/Aufgabenblatt", new ui.item({ command : "aufgaben" }), 100, plugin);
             menus.addItemByPath("Prüfung/Musterlösung", new ui.item({ command : "musterloesung" }), 200, plugin);
+            menus.addItemByPath("Prüfung/Matur", new ui.item({ command : "matur" }), 225, plugin);
             menus.addItemByPath("Prüfung/~", new ui.divider(), 250, plugin);
             menus.addItemByPath("Prüfung/Aufräumen", new ui.item({ command : "aufraeumen" }), 300, plugin);
             menus.addItemByPath("Prüfung/Git aktualisieren", new ui.item({ command : "updateGit" }), 400, plugin); 
